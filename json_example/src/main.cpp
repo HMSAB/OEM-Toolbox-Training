@@ -5,7 +5,6 @@
 #include <string>
 #include <uuid/uuid.h>
 
-
 int main(int argc, char *argv[])
 {
     printf("Running tests with JANSSON VERSION %d.%d.%d\n", JANSSON_MAJOR_VERSION,
@@ -18,5 +17,3 @@ int main(int argc, char *argv[])
     std::cout << "end" << std::endl;
     return 0;
 }
-
-
