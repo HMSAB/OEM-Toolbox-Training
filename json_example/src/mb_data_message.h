@@ -1,6 +1,10 @@
 #ifndef MB_DATA_MESSAGE_H
 #define MB_DATA_MESSAGE_H
 
+#include <uuid/uuid.h>
+#include <string>
+
+
 /**********************************************502
 *
 *****************************************/
