@@ -3,6 +3,7 @@
 
 #include <uuid/uuid.h>
 #include <string>
+#include <cstdint>
 #include "message.h"
 
 class mb_data_message {
@@ -21,8 +22,8 @@ private:
 
 public:
   void set_register(int reg) { this->reg = reg; }
-  void request(int reg, const char *command, const char *type,
-               const char *function, int slaveid, int port, const char *ip);
+  uint16_t request(int reg, const char *command, const char *type,
+                   const char *function, int slaveid, int port, const char *ip);
 };
 
 #endif
