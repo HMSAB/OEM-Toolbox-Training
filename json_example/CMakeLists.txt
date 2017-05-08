@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(test_json)
 
-if(CMAKE_SYSTEM_NAME)
-
-else()
+if(${CMAKE_CXX_COMPILER} STREQUAL "/usr/bin/c++")
     find_package(ZeroMQ REQUIRED)
+else()
+
 endif()
 
 include_directories(inc)
@@ -18,9 +18,9 @@ endif()
 
 add_executable(test_json ${SRC})
 
-if(CMAKE_SYSTEM_NAME)
-    target_link_libraries(test_json ${LINK_LIBS} zmq)
-else()
+if(${CMAKE_CXX_COMPILER} STREQUAL "/usr/bin/c++")
     target_link_libraries(test_json ${LINK_LIBS} libzmq)
+else()
+    target_link_libraries(test_json ${LINK_LIBS} zmq)
 endif()
 

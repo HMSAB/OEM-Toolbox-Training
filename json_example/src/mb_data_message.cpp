@@ -5,6 +5,30 @@
 #include <stdlib.h>
 #include <string>
 #include <uuid/uuid.h>
+#include <zmq.hpp>
+
+void mb_data_message::zmq_request(char *s)
+{
+  zmq::context_t context(1);
+  zmq::socket_t socket(context, ZMQ_REQ);
+
+  // std::cout << "Connecting to endpoint" << std::endl;
+  // socket.connect("ipc:///tmp/zeromq/modbus_tcp");
+
+  // zmq::message_t request(255);
+  // memcpy(request.data(), s, strlen(s) );
+  // std::cout << "Sending request " << std::endl;
+  // socket.send(request);
+
+  //   //  Get the reply.
+  //  zmq::message_t reply(255);
+  //  socket.recv(&reply);
+  //  std::cout << "Received response " << std::endl;
+}
+
+
+
+
 
 uint16_t mb_data_message::request(int reg, const char *command,
                                   const char *type, const char *function,
@@ -48,6 +72,7 @@ uint16_t mb_data_message::request(int reg, const char *command,
 #endif
 
   puts(s);
+  zmq_request(s);
 
   json_decref(root);
   json_decref(payload);

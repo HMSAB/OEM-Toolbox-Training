@@ -17,8 +17,9 @@ private:
   void gen_uuid(void) {
     uuid_generate(this->guid);
     uuid_unparse(guid, guid_string);
-    // std::cout << guid_string << std::endl;
   }
+
+  void zmq_request(char *s);
 
 public:
   void set_register(int reg) { this->reg = reg; }
