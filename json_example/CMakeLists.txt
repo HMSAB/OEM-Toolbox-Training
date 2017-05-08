@@ -4,7 +4,7 @@ project(test_json)
 if(${CMAKE_CXX_COMPILER} STREQUAL "/usr/bin/c++")
     find_package(ZeroMQ REQUIRED)
 else()
-
+    include_directories(/usr/local/include)
 endif()
 
 include_directories(inc)
