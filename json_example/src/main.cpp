@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
   mb_data_message my_message;
   my_message.set_register(4);
   res = my_message.request(4, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding],
-                           99, MBTCP_PORT, "192.168.1.44");
+                           99, MBTCP_PORT, "192.168.1.99");
 
   std::cout << "end" << std::endl;
   return 0;
