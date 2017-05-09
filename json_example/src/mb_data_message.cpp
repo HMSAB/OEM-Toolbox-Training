@@ -7,8 +7,24 @@
 #include <uuid/uuid.h>
 #include <zmq.hpp>
 
-void mb_data_message::zmq_request(char *s)
-{
+#define MAX_REPLY_SIZE 512
+
+
+uint16_t mb_data_message::zmq_request_parse(char *s) {
+  json_t *root;
+  json_error_t error; 
+
+  root = json_loads(s, 0, &error);
+
+  if(!root){
+    std::cout << "not root" << std::endl;
+    return -1;
+  }
+
+}
+
+
+void mb_data_message::zmq_request_send(char *s) {
   zmq::context_t context(1);
   zmq::socket_t socket(context, ZMQ_REQ);
 
@@ -16,17 +32,15 @@ void mb_data_message::zmq_request(char *s)
   socket.connect("ipc:///tmp/zeromq/modbus_tcp");
 
   zmq::message_t request(strlen(s));
-  memcpy(request.data(), s, strlen(s) );
+  memcpy(request.data(), s, strlen(s));
   std::cout << "Sending request " << std::endl;
   socket.send(request);
 
-   //Get the reply.
-   zmq::message_t reply(255);
-   socket.recv(&reply);
-   std::cout << "Received response " << (char*)reply.data() << std::endl;
+  // Get the reply.
+  zmq::message_t reply(MAX_REPLY_SIZE);
+  socket.recv(&reply);
+  std::cout << "Received response " << (char *)reply.data() << std::endl;
 }
-
-
 
 uint16_t mb_data_message::request(int reg, const char *command,
                                   const char *type, const char *function,
@@ -70,7 +84,7 @@ uint16_t mb_data_message::request(int reg, const char *command,
 #endif
 
   puts(s);
-  zmq_request(s);
+  zmq_request_send(s);
   std::cout << "return from function" << std::endl;
 
   json_decref(root);

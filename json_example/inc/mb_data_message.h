@@ -19,7 +19,8 @@ private:
     uuid_unparse(guid, guid_string);
   }
 
-  void zmq_request(char *s);
+  void zmq_request_send(char *s);
+  uint16_t zmq_request_parse(char *s);
 
 public:
   void set_register(int reg) { this->reg = reg; }
