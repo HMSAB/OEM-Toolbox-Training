@@ -11,3 +11,13 @@ libjansson http://www.digip.org/jansson/
 
 uuid-dev
 
+
+Create a build folder and go into it:
+$ mkdir build
+$ cd build
+
+CMake:
+$ cmake ../ -DCMAKE_TOOLCHAIN_FILE=../toolchainNB.cmake
+
+Compile:
+$ make
