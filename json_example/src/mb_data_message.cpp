@@ -7,7 +7,7 @@
 #include <uuid/uuid.h>
 
 
-void mb_data_message::request(int reg, std::string command, std::string type, std::string function)
+void mb_data_message::get_register(int reg, std::string command, std::string type, std::string function)
 {
     char *s = NULL;
 

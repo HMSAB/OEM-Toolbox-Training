@@ -21,8 +21,7 @@ private:
   }
 
 public:
-  void set_register(int reg) { this->reg = reg; }
-  void request(int reg, std::string command, std::string type, std::string function);
+  void get_register(int reg, std::string command, std::string type, std::string function);
   /*constructor*/
   mb_data_message(int slaveid, int port, std::string ip);
 };
