@@ -23,7 +23,7 @@ private:
 public:
   void set_register(int reg) { this->reg = reg; }
   void request(int reg, const char *command, const char *type,
-               const char *function, int slaveid, int port, const char *ip);
+               const char *function);
   /*constructor*/ 
     mb_data_message(int slaveid, int port, std::string ip);
 };

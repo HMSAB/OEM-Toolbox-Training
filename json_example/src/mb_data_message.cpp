@@ -6,11 +6,11 @@
 #include <string>
 #include <uuid/uuid.h>
 
-void mb_data_message::request(int reg, const char *command, const char *type, const char *function, int slaveid, int port, const char *ip)
+void mb_data_message::request(int reg, const char *command, const char *type, const char *function)
 {
-    this->reg = reg;
-    this->type = type;
-    this->function = function;
+    //this->reg = reg;
+    //this->type = type;
+    //this->function = function;
     char *s = NULL;
 
     json_t *root = json_object();
@@ -25,7 +25,7 @@ void mb_data_message::request(int reg, const char *command, const char *type, co
     json_object_set_new(address_json, "function", json_string(function));
     json_object_set_new(address_json, "slave_id", json_integer(slaveid));
     json_object_set_new(address_json, "register", json_integer(reg));
-    json_object_set_new(address_json, "ip_address", json_string(ip));
+    json_object_set_new(address_json, "ip_address", json_string(ip.c_str()));
     json_object_set_new(address_json, "ip_port", json_integer(port));
 
     json_object_set_new(value_json, "value_type", json_string(type));
