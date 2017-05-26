@@ -9,9 +9,10 @@ class mb_data_message {
 private:
   uuid_t guid;
   char guid_string[GUID_SIZE];
-  int reg;
+  int reg, slaveid, port;
   std::string function;
   std::string type;
+  std::string ip;
 
   void gen_uuid(void) {
     uuid_generate(this->guid);
@@ -23,6 +24,8 @@ public:
   void set_register(int reg) { this->reg = reg; }
   void request(int reg, const char *command, const char *type,
                const char *function, int slaveid, int port, const char *ip);
+  /*constructor*/ 
+    mb_data_message(int slaveid, int port, std::string ip);
 };
 
 #endif

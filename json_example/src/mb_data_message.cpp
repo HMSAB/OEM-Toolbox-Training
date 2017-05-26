@@ -53,3 +53,11 @@ void mb_data_message::request(int reg, const char *command, const char *type, co
     json_decref(payload_data);
     free(s);
 }
+
+
+mb_data_message::mb_data_message( int slaveid, int port, std::string ip)
+{
+      this->slaveid = slaveid;
+      this->port = port;
+      this->ip = ip;
+}
