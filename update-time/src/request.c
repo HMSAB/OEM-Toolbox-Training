@@ -28,8 +28,10 @@ int my_curl_init(char *target_server, CURL **curl)
     *curl = curl_easy_init();
     if (*curl) {
         curl_easy_setopt(*curl, CURLOPT_URL, target_server);
-        curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        // curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYPEER,  1L);
+        // curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYPEER, 0 );
+        curl_easy_setopt(*curl, CURLOPT_SSL_VERIFYHOST, 0);
         curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, rspCallback);
         return 0;
     }

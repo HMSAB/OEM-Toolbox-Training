@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include "nb/system.h"
 
 #include "request.h"
 
@@ -42,10 +43,9 @@ int main(int argc, char *argv[])
         return 3;
     } else {
         time_ms = get_time();
-        printf("The current time is  %ld \n", time_ms);
+        printf("The current time is  %lld \n", time_ms);
         /* so we have a good response, what should we do  ? */
-        /*if( time != 0 ){
-            
+       /* if( time != 0 ){
         }*/
     }
 
