@@ -11,6 +11,7 @@ libjansson http://www.digip.org/jansson/
 libzmqpp-dev
 libzmq-dev
 uuid-dev
+libcurl4-openssl-dev
 
 
 Create a build folder and go into it:
