@@ -8,7 +8,8 @@ dependencies:
 
 libjansson http://www.digip.org/jansson/
 
-
+libzmqpp-dev
+libzmq-dev
 uuid-dev
 
 
