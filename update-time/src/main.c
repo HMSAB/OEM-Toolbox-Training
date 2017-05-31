@@ -2,7 +2,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifndef __arm__
+#else
 #include "nb/system.h"
+
+#endif
 
 #include "request.h"
 
@@ -26,7 +31,8 @@ int main(int argc, char *argv[])
 
     /* perform request; check for error */
     curl_code = curl_easy_perform(curl);
-    if (curl_code != CURLE_OK) {
+    if (curl_code != CURLE_OK)
+    {
         printf("Request error: %s\n", curl_easy_strerror(curl_code));
         curl_easy_cleanup(curl);
         curl_global_cleanup();
@@ -41,12 +47,20 @@ int main(int argc, char *argv[])
         curl_easy_cleanup(curl);
         curl_global_cleanup();
         return 3;
-    } else {
+    }
+    else
+    {
         time_ms = get_time();
+
+#ifndef __arm__
+        printf("The current time is  %ld \n", time_ms);
+#else
         printf("The current time is  %lld \n", time_ms);
-        /* so we have a good response, what should we do  ? */
-       /* if( time != 0 ){
-        }*/
+/* so we have a good response, what should we do  ? */
+         /* if( time != 0 ){
+         }*/
+
+#endif
     }
 
     curl_easy_cleanup(curl);
@@ -57,9 +71,12 @@ int main(int argc, char *argv[])
 
 char *parse_args(int argc, char *argv[])
 {
-    if (argc != 2) {
+    if (argc != 2)
+    {
         printf("usage %s url \n", argv[0]);
-    } else {
+    }
+    else
+    {
         /*basic check for url format */
         if (strncmp(argv[1], "https://", 8) == 0)
             return argv[1];
