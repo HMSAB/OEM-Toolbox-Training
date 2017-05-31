@@ -4,8 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string>
+#include <cstring>
+#include <zmq.h>
 #include <uuid/uuid.h>
-
 
 void mb_data_message::get_register(int reg, std::string command, std::string type, std::string function)
 {
@@ -38,7 +39,6 @@ void mb_data_message::get_register(int reg, std::string command, std::string typ
     json_object_set_new(root, "payload", payload);
     json_object_set_new(payload, "payload_data", payload_data);
 
-
 #ifdef DEV_TEST
     s = json_dumps(root, JSON_INDENT(2));
 #else
@@ -50,13 +50,28 @@ void mb_data_message::get_register(int reg, std::string command, std::string typ
     json_decref(payload);
     json_decref(payload_data);
 
+    void *context = zmq_ctx_new ();
+    void *requester = zmq_socket (context, ZMQ_REQ);
+    char buffer[100];
+    zmq_connect (requester, "ipc:///tmp/zeromq/modbus_tcp");
+    zmq_send (requester, s, strlen(s), 0);
+    zmq_recv (requester, buffer, 100, 0);
+
+    puts(buffer);
+
+    // zmq::context_t context(1);
+    // zmq::socket_t socket(context, ZMQ_REQ);
+    // socket.connect("ipc:///tmp/zeromq/modbus_tcp");
+    // zmq::message_t request(strlen(s));
+    // memcpy(request.data(), s, strlen(s));
+    // socket.send(request);
+
     free(s);
 }
 
-
-mb_data_message::mb_data_message( int slaveid, int port, std::string ip)
+mb_data_message::mb_data_message(int slaveid, int port, std::string ip)
 {
-      this->slaveid = slaveid;
-      this->port = port;
-      this->ip = ip;
+    this->slaveid = slaveid;
+    this->port = port;
+    this->ip = ip;
 }

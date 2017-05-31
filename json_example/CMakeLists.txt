@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 project(test_jansson)
 
 include_directories(inc)
-set(LINK_LIBS libjansson.so libuuid.so)
+set(LINK_LIBS libjansson.so libuuid.so libzmq.so)
 
 file(GLOB SRC src/*.cpp)
 
