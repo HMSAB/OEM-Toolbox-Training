@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+enable_testing()
+
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
 
 find_package(OpenSSL)
@@ -28,7 +30,5 @@ target_link_libraries(test_uuid_gen
      ${OPENSSL_LIBRARIES}
 )
 
-add_test(
-    NAME test_uuid 
-    COMMAND test_uuid_gen 
-)
+add_test(test_uuid ./test_uuid_gen ../testmac.txt)
+add_test(test_uuid_valgrind valgrind --leak-check=full --error-exitcode=1 ./test_uuid_gen ../testmac.txt  )
