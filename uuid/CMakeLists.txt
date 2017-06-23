@@ -9,12 +9,12 @@ include_directories("./inc")
 
 set (SDK_LINK_LIBS  libnbsystem.so )
 
-add_executable(guid_gen
+add_executable(uuid_gen
     src/main.c
     src/uuid.c
 )
 
-target_link_libraries(guid_gen
+target_link_libraries(uuid_gen
      ${OPENSSL_LIBRARIES}
 )
 
