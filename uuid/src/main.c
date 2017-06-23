@@ -11,8 +11,6 @@
 #endif
 
 
-
-
 int main(void){
   printf("test\n");
   char mac[18];
