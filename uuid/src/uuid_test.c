@@ -65,8 +65,13 @@ int get_mac_test(const char *file)
   return 0;
 }
 
-int main(void)
+int main(int argc, char* argv[])
 {
-  get_mac_test("./mac_file.txt");
+  if (argc != 2) 
+  {
+    puts("Error expected input file. Usage: uuid_gen inputfile \n");
+    return 1 ;
+  }
+  get_mac_test(argv[1]);
   return 0;
 }
