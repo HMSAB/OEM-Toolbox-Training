@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
 
 
-  mb_data_message my_message(99, MBTCP_PORT, "192.168.1.44");
+  mb_data_message my_message(1, MBTCP_PORT, "192.168.1.9");
   my_message.get_register(4, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding]);
 
   std::cout << "end" << std::endl;
