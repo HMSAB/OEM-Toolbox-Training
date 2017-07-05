@@ -9,7 +9,8 @@
 #include <zmq.h>
 
 
-static void message_rec(void *requester);
+static void message_start_parse(void *requester);
+static char *parse_payload(json_t *payload);
 
 void mb_data_message::get_register(int reg, std::string command, std::string type, std::string function)
 {
@@ -59,16 +60,17 @@ void mb_data_message::get_register(int reg, std::string command, std::string typ
     zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
     zmq_send(requester, s, strlen(s), 0);
 
-    message_rec(requester);
+    message_start_parse(requester);
 
     free(s);
 }
 
-static void message_rec(void *requester)
+static void message_start_parse(void *requester)
 {
-    json_t *jroot;
+    json_t *jroot, *id, *payload;
     json_error_t jerror;
     char buffer[600];
+    char *err;
     int sizerec = zmq_recv(requester, buffer, 600, 0);
 
     buffer[sizerec] = '\0';
@@ -85,25 +87,61 @@ static void message_rec(void *requester)
         json_decref(jroot);
         return;
     }
-
-    {
-        json_t *id, *payload;
-        id = json_object_get(jroot, "id");
-        if (!json_is_string(id)) {
-            puts("error with json response parsing: json id\n");
-            json_decref(jroot);
-            return;
-        }
-        printf("ID value: %s\n ", (char*)id);
-
-        payload = json_object_get(jroot, "payload");
-         if (!json_is_object(payload)) {
-            puts("error with json response parsing: json id\n");
-            json_decref(jroot);
-            return;
-        }
-    
+    id = json_object_get(jroot, "id");
+    if (!json_is_string(id)) {
+        puts("error with json response parsing: json id\n");
+        json_decref(jroot);
+        return;
     }
+    printf("ID value: %s \n ", json_string_value(id));
+    payload = json_object_get(jroot, "payload");
+    if (!json_is_object(payload)) {
+        puts("error with json response parsing: json id\n");
+        json_decref(jroot);
+        return;
+    }
+    err = parse_payload(payload);
+
+    if (err != NULL) {
+        printf("%s\n", err);
+        free(err);
+    }
+}
+
+static char *parse_payload(json_t *payload)
+{
+    json_t *payload_type, *payload_data;
+    payload_type = json_object_get(payload, "payload_type");
+    if (!json_is_string(payload_type)) {
+        const char *err = "paylod_type was not found to be string\n";
+        puts("error with json response parsing: json payload type\n");
+        json_decref(payload);
+        return strdup(err);
+    }
+
+    payload_data = json_object_get(payload, "payload_data");
+    if (!json_is_array(payload_data)) {
+        const char *err = "paylod_type was not found to be string\n";
+        puts("error with json response parsing: json payload type\n");
+        json_decref(payload);
+        return strdup(err);
+    }
+    {
+        json_t *obj = json_array_get(payload_data, 1);
+        if (obj != NULL) {
+            printf("type of obj %d\n", json_typeof(obj));
+            if (!json_is_object(obj)) {
+                const char *err = "value was not found to be and object \n";
+                json_decref(payload_data);
+                return strdup(err);
+            }
+
+        }
+
+    }
+
+
+    return NULL;
 }
 
 mb_data_message::mb_data_message(int slaveid, int port, std::string ip)
