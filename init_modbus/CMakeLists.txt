@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.5.0)
 
-project(update_time)
+project(mb_init)
 
 #add CURL package
 find_package(CURL REQUIRED)
@@ -13,5 +13,5 @@ include_directories(include)
 #sources
 file( GLOB SOURCES "src/*.c")
 
-add_executable(update_time ${SOURCES})
-target_link_libraries(update_time ${CURL_LIBRARIES} ${SDK_LINK_LIBS} )
+add_executable(mb_init ${SOURCES})
+target_link_libraries(mb_init ${CURL_LIBRARIES} ${SDK_LINK_LIBS} )
