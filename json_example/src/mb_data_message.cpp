@@ -17,7 +17,14 @@ static void parse_array(json_t *payload_data, char *err);
 static void parse_object(json_t *payload_data, char *err);
 
 
+
+
 void mb_data_message::read_u16_register(int reg){
+    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], NULL);
+}
+
+void mb_data_message::read_u16_register_callback(int reg, void(*resp_cbf)(uint16_t val) ){
+    this->callback =resp_cbf;
     reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], NULL);
 }
 

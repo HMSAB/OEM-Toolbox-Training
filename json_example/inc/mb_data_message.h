@@ -12,6 +12,7 @@ private:
   char guid_string[GUID_SIZE];
   int reg, slaveid, port;
   std::string ip;
+  void (*callback)(uint16_t val);
 
   void gen_uuid(void)
   {
@@ -22,6 +23,7 @@ private:
 
 public:
   void read_u16_register(int reg);
+  void read_u16_register_callback(int reg, void (*resp_cbf)(uint16_t val)  );
   void write_u16_register(int reg, uint16_t val);
   void read_flt_register(int reg);
   /*constructor*/

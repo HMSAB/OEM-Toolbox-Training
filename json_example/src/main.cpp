@@ -6,6 +6,10 @@
 #include <uuid/uuid.h>
 #include "message.h"
 
+void printer(uint16_t val){
+  printf("the return value is %x \n", val);
+}
+
 int main(int argc, char *argv[])
 {
   printf("Running program with JANSSON VERSION %d.%d.%d\n", JANSSON_MAJOR_VERSION,
@@ -17,6 +21,8 @@ int main(int argc, char *argv[])
   my_message.write_u16_register(2, 56);
 
   my_message.read_u16_register(2);
+  my_message.read_u16_register_callback(2, &printer);
+  
   // my_message.read_u16_register(2);
   // my_message.read_u16_register(3);
   // my_message.read_u16_register(4);
