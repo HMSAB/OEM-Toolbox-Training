@@ -17,14 +17,18 @@ static void parse_object(json_t *payload_data, char *err);
 
 
 void mb_data_message::read_u16_register(int reg){
-    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding]);
+    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], NULL);
 }
 
 void mb_data_message::read_flt_register(int reg){
-    reg_func(reg, COMMAND[read], VALUE_TYPE[FLT], FUNCTION[Holding]);
+    reg_func(reg, COMMAND[read], VALUE_TYPE[FLT], FUNCTION[Holding], NULL);
 }
 
-void mb_data_message::reg_func(int reg, std::string command, std::string type, std::string function)
+void mb_data_message::write_u16_register(int reg, uint16_t val){
+    reg_func(reg, COMMAND[write], VALUE_TYPE[U16], FUNCTION[Holding], val);
+}
+
+void mb_data_message::reg_func(int reg, std::string command, std::string type, std::string function ,uint16_t val)
 {
     char *s = NULL;
 
@@ -44,6 +48,9 @@ void mb_data_message::reg_func(int reg, std::string command, std::string type, s
     json_object_set_new(address_json, "ip_port", json_integer(port));
 
     json_object_set_new(value_json, "value_type", json_string(type.c_str()));
+    if (strncmp(COMMAND[write], command.c_str(), 5) == 0){
+        json_object_set_new(value_json, "value_data", json_integer(val));
+    }
     json_object_set_new(command_json, "address", address_json);
     json_object_set_new(command_json, "value", value_json);
     json_array_append(payload_data, command_json);

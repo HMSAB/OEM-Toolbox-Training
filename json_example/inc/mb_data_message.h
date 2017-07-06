@@ -18,10 +18,11 @@ private:
     uuid_generate(this->guid);
     uuid_unparse(guid, guid_string);
   }
-  void reg_func(int reg, std::string command, std::string type, std::string function);
+  void reg_func(int reg, std::string command, std::string type, std::string function , uint16_t val);
 
 public:
   void read_u16_register(int reg);
+  void write_u16_register(int reg, uint16_t val);
   void read_flt_register(int reg);
   /*constructor*/
   mb_data_message(int slaveid, int port, std::string ip);

@@ -13,14 +13,13 @@ int main(int argc, char *argv[])
 
   mb_data_message my_message(1, MBTCP_PORT, "192.168.1.9");
 
-  my_message.read_u16_register(1);
+
+  my_message.write_u16_register(2, 56);
+
   my_message.read_u16_register(2);
-  my_message.read_u16_register(3);
-  my_message.read_u16_register(4);
-
-  my_message.read_flt_register(1);
-
-
+  // my_message.read_u16_register(2);
+  // my_message.read_u16_register(3);
+  // my_message.read_u16_register(4);
 
   std::cout << "end" << std::endl;
   return 0;
