@@ -8,13 +8,13 @@
 #include <uuid/uuid.h>
 #include <zmq.h>
 
-#define DEBUG
+//#define DEBUG
 
-static void message_start_parse(void *requester);
-static char *parse_payload(json_t *payload);
+static void message_start_parse(void *requester,void (*cbf)(uint16_t val));
+static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val));
 
-static void parse_array(json_t *payload_data, char *err);
-static void parse_object(json_t *payload_data, char *err);
+static void parse_array(json_t *payload_data, char *err , void (*cbf)(uint16_t val));
+static void parse_object(json_t *payload_data, char *err, void (*cbf)(uint16_t val));
 
 
 
@@ -89,20 +89,21 @@ void mb_data_message::reg_func(int reg, std::string command, std::string type, s
     zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
     zmq_send(requester, s, strlen(s), 0);
 
-    message_start_parse(requester);
+    message_start_parse(requester, this->callback);
 
     free(s);
 }
 
-static void message_start_parse(void *requester)
+static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
 {
     json_t *jroot, *id, *payload;
     json_error_t jerror;
     char buffer[600];
     char *err;
     int sizerec = zmq_recv(requester, buffer, 600, 0);
-#ifdef DEBUG
     buffer[sizerec] = '\0';
+#ifdef DEBUG
+    
     puts(buffer);
 #endif
     jroot = json_loads(buffer, 0, &jerror);
@@ -131,7 +132,7 @@ static void message_start_parse(void *requester)
         json_decref(jroot);
         return;
     }
-    err = parse_payload(payload);
+    err = parse_payload(payload , cbf);
 
     if (err != NULL) {
         printf("%s\n", err);
@@ -140,28 +141,31 @@ static void message_start_parse(void *requester)
     json_decref(jroot);
 }
 
-static void parse_object(json_t *payload_data, char* err)
+static void parse_object(json_t *payload_data, char* err, void (*cbf)(uint16_t val))
 {
     const char *key;
     json_t *obj_val;
     json_object_foreach(payload_data, key, obj_val){
         switch json_typeof(obj_val){
             case JSON_OBJECT:
-                parse_object(obj_val, err);
+                parse_object(obj_val, err , cbf);
                 break;
             case JSON_ARRAY:
-                parse_array(obj_val, err);
+                parse_array(obj_val, err, cbf);
             break;
             case JSON_STRING:
                 //printf("json string %s %s \n",key, json_string_value(obj_val) );
             break;
             case JSON_INTEGER:
                 if(strncmp(key ,"value_data", 9)==0){
-                    printf("json int %s %lld \n",key, json_integer_value(obj_val) );
+                    if(cbf != NULL){
+                        cbf(json_integer_value(obj_val));
+                    }
                 }
             break;
             case JSON_REAL:
                 if(strncmp(key ,"value_data", 9)==0){
+                    printf("more work needs to be done on floats\n");
                     printf("json int %s %lf \n",key, json_real_value(obj_val) );
                     printf("json int %s %lf \n",key, json_number_value(obj_val) );
                 }
@@ -178,18 +182,17 @@ static void parse_object(json_t *payload_data, char* err)
     
 }
 
-static void parse_array(json_t *payload_data, char *err)
+static void parse_array(json_t *payload_data, char *err, void (*cbf)(uint16_t val))
 {
-   
     size_t index;
     json_t *array_value;
     json_array_foreach(payload_data, index, array_value){
         switch json_typeof(array_value){
             case JSON_OBJECT:
-                parse_object(array_value, err);
+                parse_object(array_value, err , cbf);
             break;
             case JSON_ARRAY:
-                parse_array(array_value, err);
+                parse_array(array_value, err, cbf);
             break;
             default:
             {
@@ -202,7 +205,7 @@ static void parse_array(json_t *payload_data, char *err)
     }
 }
 
-static char *parse_payload(json_t *payload)
+static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val))
 {
     char *err = NULL;
     json_t *payload_type, *payload_data_array;
@@ -218,7 +221,7 @@ static char *parse_payload(json_t *payload)
         json_decref(payload);
         return strdup(lerr);
     }
-    parse_array( payload_data_array, err);
+    parse_array( payload_data_array, err , cbf);
     return err;
 }
 
