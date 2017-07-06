@@ -109,6 +109,7 @@ static void message_start_parse(void *requester)
         printf("%s\n", err);
         free(err);
     }
+    json_decref(jroot);
 }
 
 static void parse_object(json_t *payload_data, char* err)
@@ -124,13 +125,16 @@ static void parse_object(json_t *payload_data, char* err)
                 parse_array(obj_val, err);
             break;
             case JSON_STRING:
-                printf("json string %s %s \n",key, json_string_value(obj_val) );
+                //printf("json string %s %s \n",key, json_string_value(obj_val) );
             break;
             case JSON_INTEGER:
-                printf("json int %s %d \n",key, json_integer_value(obj_val) );
+                if(strncmp(key ,"value_data", 9)==0){
+                    printf("json int %s %d \n",key, json_integer_value(obj_val) );
+                }
+                //printf("json int %s %d \n",key, json_integer_value(obj_val) );
             break;
             case JSON_REAL:
-                 printf("json real %s %f \n", key, json_integer_value(obj_val));
+                 //printf("json real %s %f \n", key, json_integer_value(obj_val));
             break;
             default:
             {
@@ -158,15 +162,6 @@ static void parse_array(json_t *payload_data, char *err)
             case JSON_ARRAY:
                 parse_array(array_value, err);
             break;
-            // case JSON_STRING:
-            //         printf("json string %s %s \n",key, json_string_value(array_value) );
-            // break;
-            // case JSON_INTEGER:
-                
-            // break;
-            // case JSON_REAL:
-                
-            // break;
             default:
             {
                 int n; 
@@ -206,70 +201,3 @@ mb_data_message::mb_data_message(int slaveid, int port, std::string ip)
     this->port = port;
     this->ip = ip;
 }
-
-
-
-
-    // json_array_foreach(payload_data_array, index, array_value){
-    //     switch json_typeof(array_value)
-    //     {
-    //         case JSON_OBJECT:
-    //             json_object_foreach(array_value, key, obj_val){
-    //                 switch json_typeof(obj_val){
-    //                     case JSON_OBJECT:
-    //                         json_object_foreach(array_value, key, obj_val){
-    //                             switch json_typeof(obj_val){
-    //                                 case JSON_STRING:
-    //                                     printf("json string %s %s \n",key, json_string_value(obj_val) );
-    //                                 break;
-    //                                 case JSON_INTEGER:
-    //                                     printf("json int %s %d \n", key, obj_val);
-    //                                 break;
-    //                                 default:
-    //                                 break;
-    //                             }
-    //                         }
-    //                     break;
-
-    //                     case JSON_STRING:
-    //                         printf("json string %s %s \n",key, json_string_value(obj_val) );
-    //                     break;
-    //                     case JSON_INTEGER:
-    //                         printf("json int %s %d \n", key, obj_val);
-    //                     break;
-    //                     case JSON_REAL:
-    //                     break;
-
-    //                     default:
-    //                         printf("not able to handle key %s , val  %s \n", key, obj_val);
-    //                     break;        
-    //                 }
-    //             }
-    //         break;
-    //         case JSON_INTEGER:
-    //         break;
-    //         case JSON_REAL:
-    //         break;
-    //         case JSON_STRING:
-    //             printf("json string %s\n",json_string_value(array_value) );
-    //         break;
-    //         default:
-    //         printf("not able to handle index %d  type %d \n", index, json_typeof(array_value));
-    //     }
-    // }
-
-
-
-
-    // {
-    //     json_t *obj = json_array_get(payload_data, 1);
-    //     if (obj != NULL) {
-    //         printf("type of obj %d\n", json_typeof(obj));
-    //         if (!json_is_object(obj)) {
-    //             const char *err = "value was not found to be and object \n";
-    //             json_decref(payload_data);
-    //             return strdup(err);
-    //         }
-    //     }
-
-    // // }
