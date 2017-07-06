@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
   my_message.read_u16_register(3);
   my_message.read_u16_register(4);
 
+  my_message.read_flt_register(1);
+
+
 
   std::cout << "end" << std::endl;
   return 0;

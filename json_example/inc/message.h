@@ -50,7 +50,9 @@ static const char *COMMAND[] = {FOREACH_COMMAND(GEN_STRING)};
   VALUE_TYPE(S32)                                                              \
   VALUE_TYPE(U32)                                                              \
   VALUE_TYPE(S64)                                                              \
-  VALUE_TYPE(U64)
+  VALUE_TYPE(U64)                                                              \
+  VALUE_TYPE(FLT)
+
 
 enum VALUE_TYPE { FOREACH_VALUE_TYPE(GEN_ENUM) };
 
