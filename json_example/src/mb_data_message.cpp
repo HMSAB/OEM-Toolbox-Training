@@ -11,8 +11,9 @@
 
 static void message_start_parse(void *requester);
 static char *parse_payload(json_t *payload);
-static char *parse_array(json_t *payload_data);
-static char *parse_object(json_t *payload_data);
+
+static void parse_array(json_t *payload_data, char *err);
+static void parse_object(json_t *payload_data, char *err);
 
 void mb_data_message::get_register(int reg, std::string command, std::string type, std::string function)
 {
@@ -110,38 +111,41 @@ static void message_start_parse(void *requester)
     }
 }
 
-static char *parse_object(json_t *payload_data)
+static void parse_object(json_t *payload_data, char* err)
 {
     const char *key;
     json_t *obj_val;
     json_object_foreach(payload_data, key, obj_val){
         switch json_typeof(obj_val){
             case JSON_OBJECT:
-                    return parse_object(obj_val);
+                parse_object(obj_val, err);
                 break;
             case JSON_ARRAY:
-                return parse_array(obj_val);
+                parse_array(obj_val, err);
             break;
             case JSON_STRING:
-                    printf("json string %s %s \n",key, json_string_value(obj_val) );
-                    return NULL;
+                printf("json string %s %s \n",key, json_string_value(obj_val) );
             break;
             case JSON_INTEGER:
-                   printf("json int %s %d \n",key, json_integer_value(obj_val) );
-                   return NULL;
+                printf("json int %s %d \n",key, json_integer_value(obj_val) );
             break;
             case JSON_REAL:
                  printf("json real %s %f \n", key, json_integer_value(obj_val));
             break;
             default:
-            printf("not able to handle object  %s \n",key);
+            {
+                int n; 
+                err = (char*) malloc(50);
+                n = sprintf(err, "not able to handle index %s  type %d\n", key, json_typeof(obj_val));
+                return;
+            }
             break;
         }                  
     }
     
 }
 
-static char *parse_array(json_t *payload_data)
+static void parse_array(json_t *payload_data, char *err)
 {
    
     size_t index;
@@ -149,10 +153,10 @@ static char *parse_array(json_t *payload_data)
     json_array_foreach(payload_data, index, array_value){
         switch json_typeof(array_value){
             case JSON_OBJECT:
-                return parse_object(array_value);
+                parse_object(array_value, err);
             break;
             case JSON_ARRAY:
-                return parse_array(array_value);
+                parse_array(array_value, err);
             break;
             // case JSON_STRING:
             //         printf("json string %s %s \n",key, json_string_value(array_value) );
@@ -164,17 +168,20 @@ static char *parse_array(json_t *payload_data)
                 
             // break;
             default:
-            printf("not able to handle index %d  type %d\n", index, json_typeof(array_value));
+            {
+                int n; 
+                err = (char*) malloc(50);
+                n = sprintf(err, "not able to handle index %d  type %d\n", index, json_typeof(array_value));
+                return;
+            }
             break;
-
         }
     }
-    return NULL;
 }
 
 static char *parse_payload(json_t *payload)
 {
-
+    char *err;
     json_t *payload_type, *payload_data_array;
     payload_type = json_object_get(payload, "payload_type");
     if (!json_is_string(payload_type)) {
@@ -189,7 +196,8 @@ static char *parse_payload(json_t *payload)
         json_decref(payload);
         return strdup(err);
     }
-    return parse_array( payload_data_array);
+    parse_array( payload_data_array, err);
+    return err;
 }
 
 mb_data_message::mb_data_message(int slaveid, int port, std::string ip)
