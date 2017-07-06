@@ -19,9 +19,11 @@ private:
     uuid_unparse(guid, guid_string);
     // std::cout << guid_string << std::endl;
   }
+  void get_register(int reg, std::string command, std::string type, std::string function);
 
 public:
-  void get_register(int reg, std::string command, std::string type, std::string function);
+  //void get_register(int reg, std::string command, std::string type, std::string function);
+  void read_u16_register(int reg);
   /*constructor*/
   mb_data_message(int slaveid, int port, std::string ip);
 };

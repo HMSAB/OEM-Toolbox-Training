@@ -15,6 +15,13 @@ static char *parse_payload(json_t *payload);
 static void parse_array(json_t *payload_data, char *err);
 static void parse_object(json_t *payload_data, char *err);
 
+static void get_register(int reg, std::string command, std::string type, std::string function);
+
+
+void mb_data_message::read_u16_register(int reg){
+    get_register(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding]);
+}
+
 void mb_data_message::get_register(int reg, std::string command, std::string type, std::string function)
 {
     char *s = NULL;
