@@ -8,6 +8,7 @@
 #include <uuid/uuid.h>
 #include <zmq.h>
 
+#define DEBUG
 
 static void message_start_parse(void *requester);
 static char *parse_payload(json_t *payload);
@@ -68,7 +69,9 @@ void mb_data_message::reg_func(int reg, std::string command, std::string type, s
     s = json_dumps(root, 0);
 #endif
 
+#ifdef DEBUG
     puts(s);
+#endif 
     json_decref(root);
     json_decref(payload);
     json_decref(payload_data);
@@ -91,10 +94,10 @@ static void message_start_parse(void *requester)
     char buffer[600];
     char *err;
     int sizerec = zmq_recv(requester, buffer, 600, 0);
-
+#ifdef DEBUG
     buffer[sizerec] = '\0';
     puts(buffer);
-
+#endif
     jroot = json_loads(buffer, 0, &jerror);
     if (!jroot) {
         puts("error with json response parsing: json loads\n");
@@ -112,7 +115,9 @@ static void message_start_parse(void *requester)
         json_decref(jroot);
         return;
     }
+#ifdef DEBUG   
     printf("ID value: %s\n", json_string_value(id));
+#endif
     payload = json_object_get(jroot, "payload");
     if (!json_is_object(payload)) {
         puts("error with json response parsing: json id\n");
@@ -147,7 +152,6 @@ static void parse_object(json_t *payload_data, char* err)
                 if(strncmp(key ,"value_data", 9)==0){
                     printf("json int %s %lld \n",key, json_integer_value(obj_val) );
                 }
-                //printf("json int %s %d \n",key, json_integer_value(obj_val) );
             break;
             case JSON_REAL:
                 if(strncmp(key ,"value_data", 9)==0){
@@ -201,7 +205,6 @@ static char *parse_payload(json_t *payload)
         json_decref(payload);
         return strdup(lerr);
     }
-
     payload_data_array = json_object_get(payload, "payload_data");
     if (!json_is_array(payload_data_array)) {
         const char *lerr = "paylod_type was not found to be string\n";
