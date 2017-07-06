@@ -124,19 +124,21 @@ static char *parse_object(json_t *payload_data)
             break;
             case JSON_STRING:
                     printf("json string %s %s \n",key, json_string_value(obj_val) );
+                    return NULL;
             break;
             case JSON_INTEGER:
-               //    printf("json int %s %s \n",key, json_integer_value(obj_val) );
+                   printf("json int %s %d \n",key, json_integer_value(obj_val) );
+                   return NULL;
             break;
             case JSON_REAL:
-                
+                 printf("json real %s %f \n", key, json_integer_value(obj_val));
             break;
             default:
             printf("not able to handle object  %s \n",key);
             break;
         }                  
     }
-    return NULL;
+    
 }
 
 static char *parse_array(json_t *payload_data)
