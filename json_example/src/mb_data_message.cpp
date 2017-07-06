@@ -8,7 +8,7 @@
 #include <uuid/uuid.h>
 #include <zmq.h>
 
-//#define DEBUG
+#define DEBUG
 
 static void message_start_parse(void *requester,void (*cbf)(uint16_t val));
 static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val));
@@ -17,19 +17,17 @@ static void parse_array(json_t *payload_data, char *err , void (*cbf)(uint16_t v
 static void parse_object(json_t *payload_data, char *err, void (*cbf)(uint16_t val));
 
 
-
-
 void mb_data_message::read_u16_register(int reg){
-    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], NULL);
+    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], (uint16_t) NULL);
 }
 
 void mb_data_message::read_u16_register_callback(int reg, void(*resp_cbf)(uint16_t val) ){
     this->callback =resp_cbf;
-    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], NULL);
+    reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], (uint16_t) NULL);
 }
 
 void mb_data_message::read_flt_register(int reg){
-    reg_func(reg, COMMAND[read], VALUE_TYPE[FLT], FUNCTION[Holding], NULL);
+    reg_func(reg, COMMAND[read], VALUE_TYPE[FLT], FUNCTION[Holding], (uint16_t)NULL);
 }
 
 void mb_data_message::write_u16_register(int reg, uint16_t val){
@@ -77,7 +75,9 @@ void mb_data_message::reg_func(int reg, std::string command, std::string type, s
 #endif
 
 #ifdef DEBUG
+    puts("\n\n\n********  Request Message *********");
     puts(s);
+    puts("\n");
 #endif 
     json_decref(root);
     json_decref(payload);
@@ -99,18 +99,22 @@ static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
     json_t *jroot, *id, *payload;
     json_error_t jerror;
     char buffer[600];
-    char *err;
+    char *err, *s;
     int sizerec = zmq_recv(requester, buffer, 600, 0);
     buffer[sizerec] = '\0';
-#ifdef DEBUG
-    
-    puts(buffer);
-#endif
+
     jroot = json_loads(buffer, 0, &jerror);
     if (!jroot) {
         puts("error with json response parsing: json loads\n");
         return;
     }
+   
+#ifdef DEBUG
+    puts("***********  Response *************");
+    s = json_dumps(jroot, JSON_INDENT(2));
+    puts(s);
+    free(s);
+#endif 
 
     if (!json_is_object(jroot)) {
         puts("error with json response parsing: json is objects\n");
@@ -123,9 +127,7 @@ static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
         json_decref(jroot);
         return;
     }
-#ifdef DEBUG   
-    printf("ID value: %s\n", json_string_value(id));
-#endif
+
     payload = json_object_get(jroot, "payload");
     if (!json_is_object(payload)) {
         puts("error with json response parsing: json id\n");
