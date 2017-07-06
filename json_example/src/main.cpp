@@ -12,7 +12,7 @@ void printer(uint16_t val){
 
 int main(int argc, char *argv[])
 {
-  printf("Running program with JANSSON VERSION %d.%d.%d\n", JANSSON_MAJOR_VERSION,
+  printf("Running program with JANSSON VERSION %d.%d.%d\n", JANSSON_MAJOR_VERSION,\
          JANSSON_MINOR_VERSION, JANSSON_MICRO_VERSION);
 
 
