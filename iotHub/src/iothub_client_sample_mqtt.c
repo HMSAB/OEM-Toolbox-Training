@@ -15,15 +15,23 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+#define BUFF_SIZE 200
+char file_buffer[BUFF_SIZE];
+
+
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = ;
+
+
+static char  *connectionString; 
 
 static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
 static bool g_continueRunning;
+
+
 #define MESSAGE_COUNT 250
 #define DOWORK_LOOP_NUM     3
 
@@ -54,11 +62,47 @@ static bool g_continueRunning;
 "-----END CERTIFICATE-----\r\n" ; 
 #endif
 
+
+
+
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
+
+
+
+static char* getConnectionString(void)
+{
+    long fileSize;
+	size_t res; 
+	char *token;
+	const char delim[] = "\n";
+    
+    
+    FILE *pFile = fopen("/home/root/ConnectionString.txt","rb");
+	if(pFile == NULL) { 
+		perror("file open error going with stdname\n");
+	}else { 
+		
+		res = fread( (void*) file_buffer, BUFF_SIZE, 1, pFile); 
+		if (res <= 0) { perror("File read size 0\n"); }	
+
+		/*remove the newline from the filebuffer*/
+	    strtok( file_buffer , delim);
+		fclose(pFile);
+	}
+	if( strlen(file_buffer) != 0) { 
+        return file_buffer;
+    }else
+    {
+        return NULL;
+    }    
+}
+
+
+
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
@@ -146,6 +190,11 @@ void iothub_client_sample_mqtt_run(void)
     
     callbackCounter = 0;
     int receiveContext = 0;
+
+
+    connectionString = getConnectionString();
+    puts(connectionString);
+
 
     if (platform_init() != 0)
     {
