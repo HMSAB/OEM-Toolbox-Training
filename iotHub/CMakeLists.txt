@@ -14,7 +14,7 @@ find_package(CURL REQUIRED)
 
 
 set(iothub_client_sample_mqtt_c_files
-    src/iothub_client_sample_mqtt.c
+    src/iothub_client_NB301_mqtt.c
 )
 
 set(iothub_client_sample_mqtt_h_files
