@@ -7,40 +7,64 @@
 #include <zmq.h>
 
 #define DEBUG
+#define DEV_TEST
+
+#define SLAVE_ID 1
+#define GUID_SIZE 37
+
 
  
-static char target_ipaddr[12];
-static int target_port
+static char target_ipaddr[16];
+static int target_port;
 
 
-int set_ip_port(const char *ip, int port)
+static void parse_object(json_t *payload_data, char* err, void (*cbf)(uint16_t val));
+
+static void parse_array(json_t *payload_data, char *err, void (*cbf)(uint16_t val));
+static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val));
+
+
+static void message_start_parse(void *requester, void (*cbf)(uint16_t val));
+
+
+
+int init_ip_port(const char *ip, int port)
 {
     if (port > 5000 || port < 0) {
         printf("port number invalid\n");
-        return -1
+        return -1;
     }
 
     if (strlen(ip) < 6 || strlen(ip) > 36) {
         printf("ip address invalid\n");
-        return -1
+        return -1;
     }
 
-    target_port = pprt;
+    target_port = port;
     strcpy(target_ipaddr, ip);
     return 0;
 }
 
 
-static void gen_uuid(uuit_t *guid)
+static void gen_uuid(char *guid)
 {
-    uuid_generate( guid );
+    uuid_t uuid;
+    uuid_generate( uuid );
+    uuid_unparse(uuid, guid);
 }
 
 
-uint16_t
-    get_u16_register(int reg)
+void printer(uint16_t val){
+    printf("The results %d\n", val);
+}
+
+
+int get_u16_register(int reg)
 {
     char *s = NULL;
+    char uuid[GUID_SIZE];
+    int res; 
+
 
     json_t *root = json_object();
     json_t *payload = json_object();
@@ -50,35 +74,29 @@ uint16_t
     json_t *address_json = json_object();
     json_t *value_json = json_object();
 
-    json_object_set_new(command_json, "command", json_string("read");
-    json_object_set_new(address_json, "function", json_string("input"));
-    json_object_set_new(address_json, "slave_id", json_integer(slaveid));
+    json_object_set_new(command_json, "command", json_string(COMMAND[read]));
+    json_object_set_new(address_json, "function", json_string(FUNCTION[Holding]));
+    json_object_set_new(address_json, "slave_id", json_integer(SLAVE_ID));
     json_object_set_new(address_json, "register", json_integer(reg));
-    json_object_set_new(address_json, "ip_address", json_string(ip.c_str()));
-    json_object_set_new(address_json, "ip_port", json_integer(port));
+    json_object_set_new(address_json, "ip_address", json_string(target_ipaddr));
+    json_object_set_new(address_json, "ip_port", json_integer(target_port));
 
-    json_object_set_new(value_json, "value_type", json_string(type.c_str()));
-    if (strncmp(COMMAND[write], command.c_str(), 5) == 0) {
-        json_object_set_new(value_json, "value_data", json_integer(val));
-    }
+    json_object_set_new(value_json, "value_type", json_string("U16"));
+
     json_object_set_new(command_json, "address", address_json);
     json_object_set_new(command_json, "value", value_json);
     json_array_append(payload_data, command_json);
 
-    gen_uuid();
-    json_object_set_new(root, "id", json_string(this->guid_string));
+    gen_uuid(uuid);
+    json_object_set_new(root, "id", json_string( uuid));
     json_object_set_new(payload, "payload_type", json_string("request"));
 
     json_object_set_new(root, "payload", payload);
     json_object_set_new(payload, "payload_data", payload_data);
 
-#ifdef DEV_TEST
-    s = json_dumps(root, JSON_INDENT(2));
-#else
-    s = json_dumps(root, 0);
-#endif
 
 #ifdef DEBUG
+    s = json_dumps(root, JSON_INDENT(2));
     puts("\n\n\n********  Request Message *********");
     puts(s);
     puts("\n");
@@ -86,14 +104,153 @@ uint16_t
     json_decref(root);
     json_decref(payload);
     json_decref(payload_data);
+    json_decref(command_json);
+    json_decref(address_json);
+    json_decref(value_json);
 
-    // void *context = zmq_ctx_new();
-    // void *requester = zmq_socket(context, ZMQ_REQ);
+    void *context = zmq_ctx_new();
+    void *requester = zmq_socket(context, ZMQ_REQ);
 
-    // zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
-    // zmq_send(requester, s, strlen(s), 0);
+    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
+    zmq_send(requester, s, strlen(s), 0);
 
-    ///message_start_parse(requester, this->callback);
-
+    
+    message_start_parse(requester,  &printer);
     free(s);
+    return 0;
+}
+
+
+
+static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
+{
+    json_t *jroot, *id, *payload;
+    json_error_t jerror;
+    char buffer[600];
+    char *err, *s;
+    int sizerec = zmq_recv(requester, buffer, 600, 0);
+    buffer[sizerec] = '\0';
+
+    jroot = json_loads(buffer, 0, &jerror);
+    if (!jroot) {
+        puts("error with json response parsing: json loads\n");
+        return;
+    }
+   
+#ifdef DEBUG
+    puts("***********  Response *************");
+    s = json_dumps(jroot, JSON_INDENT(2));
+    puts(s);
+    free(s);
+#endif 
+
+    if (!json_is_object(jroot)) {
+        puts("error with json response parsing: json is objects\n");
+        json_decref(jroot);
+        return;
+    }
+    id = json_object_get(jroot, "id");
+    if (!json_is_string(id)) {
+        puts("error with json response parsing: json id\n");
+        json_decref(jroot);
+        return;
+    }
+
+    payload = json_object_get(jroot, "payload");
+    if (!json_is_object(payload)) {
+        puts("error with json response parsing: json id\n");
+        json_decref(jroot);
+        return;
+    }
+    err = parse_payload(payload , cbf);
+
+    if (err != NULL) {
+        printf("%s\n", err);
+        free(err);
+    }
+    json_decref(jroot);
+}
+
+static void parse_object(json_t *payload_data, char* err, void (*cbf)(uint16_t val))
+{
+    const char *key;
+    json_t *obj_val;
+    json_object_foreach(payload_data, key, obj_val){
+        switch json_typeof(obj_val){
+            case JSON_OBJECT:
+                parse_object(obj_val, err , cbf);
+                break;
+            case JSON_ARRAY:
+                parse_array(obj_val, err, cbf);
+            break;
+            case JSON_STRING:
+                //printf("json string %s %s \n",key, json_string_value(obj_val) );
+            break;
+            case JSON_INTEGER:
+                if(strncmp(key ,"value_data", 9)==0){
+                    if(cbf != NULL){
+                        cbf(json_integer_value(obj_val));
+                    }
+                }
+            break;
+            case JSON_REAL:
+                if(strncmp(key ,"value_data", 9)==0){
+                    printf("more work needs to be done on floats\n");
+                    printf("json int %s %lf \n",key, json_real_value(obj_val) );
+                    printf("json int %s %lf \n",key, json_number_value(obj_val) );
+                }
+            break;
+            default:
+            {
+                err = (char*) malloc(50);
+                sprintf(err, "not able to handle index %s  type %d\n", key, json_typeof(obj_val));
+                return;
+            }
+            break;
+        }                  
+    }
+    
+}
+
+static void parse_array(json_t *payload_data, char *err, void (*cbf)(uint16_t val))
+{
+    size_t index;
+    json_t *array_value;
+    json_array_foreach(payload_data, index, array_value){
+        switch json_typeof(array_value){
+            case JSON_OBJECT:
+                parse_object(array_value, err , cbf);
+            break;
+            case JSON_ARRAY:
+                parse_array(array_value, err, cbf);
+            break;
+            default:
+            {
+                err = (char*) malloc(50);
+                sprintf(err, "not able to handle index %d  type %d\n", index, json_typeof(array_value));
+                return;
+            }
+            break;
+        }
+    }
+}
+
+static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val))
+{
+    char *err = NULL;
+    json_t *payload_type, *payload_data_array;
+    payload_type = json_object_get(payload, "payload_type");
+    if (!json_is_string(payload_type)) {
+        const char *lerr = "paylod_type was not found to be string\n";
+        json_decref(payload);
+        return strdup(lerr);
+    }
+    payload_data_array = json_object_get(payload, "payload_data");
+    if (!json_is_array(payload_data_array)) {
+        const char *lerr = "paylod_type was not found to be string\n";
+        json_decref(payload);
+        return strdup(lerr);
+    }
+    parse_array( payload_data_array, err , cbf);
+    return err;
 }

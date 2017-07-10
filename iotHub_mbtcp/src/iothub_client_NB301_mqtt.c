@@ -293,9 +293,12 @@ void iothub_client_sample_mqtt_run(void)
 #define IP "192.168.1.9"
 int main(void)
 {
+    int res;
     //iothub_client_sample_mqtt_run();
 
-    set_ip_port(IP , 502);
-    get_u16_register(2);
+    res = init_ip_port(IP , 502);
+    res = get_u16_register(1);
+    res = get_u16_register(2);
+    res = get_u16_register(3);
     return 0;
 }
