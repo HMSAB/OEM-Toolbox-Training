@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.5.0)
 
-project(iothub_mqtt)
+project(iothub_mbtcp_mqtt)
 
 #compileAsC99()
 
@@ -25,17 +25,19 @@ set(iothub_client_sample_mqtt_h_files
 include_directories(inc)
 link_directories(libs)
 
-add_executable(iothub_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
+set(AZURE_LIBS libiothub_client_mqtt_transport.a  
+    libiothub_client.a 
+    libaziotsharedutil.a
+    libumqtt.a )
 
-target_link_libraries(iothub_mqtt  
-    iothub_client_mqtt_transport
-    iothub_client 
-    aziotsharedutil
-    umqtt
+add_executable(iothub_mbtcp_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
+
+target_link_libraries(iothub_mbtcp_mqtt  
+    ${LINK_LIBS}
+    ${AZURE_LIBS}
     ${CMAKE_THREAD_LIBS_INIT} 
     ${CURL_LIBRARIES}
     ${OPENSSL_LIBRARIES} 
-    ${LINK_LIBS}
     m
 )
 

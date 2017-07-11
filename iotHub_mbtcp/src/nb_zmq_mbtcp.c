@@ -28,6 +28,10 @@ static void message_start_parse(void *requester, void (*cbf)(uint16_t val));
 
 
 
+void print_test(){
+    puts("Test");
+}
+
 int init_ip_port(const char *ip, int port)
 {
     if (port > 5000 || port < 0) {
@@ -116,7 +120,9 @@ int get_u16_register(int reg)
 
     
     message_start_parse(requester,  &printer);
+    #ifdef DEBUG
     free(s);
+    #endif 
     return 0;
 }
 

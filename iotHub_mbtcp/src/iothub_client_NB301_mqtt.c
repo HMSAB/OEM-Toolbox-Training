@@ -294,11 +294,14 @@ void iothub_client_sample_mqtt_run(void)
 int main(void)
 {
     int res;
-    //iothub_client_sample_mqtt_run();
-
+    print_test();
     res = init_ip_port(IP , 502);
     res = get_u16_register(1);
-    res = get_u16_register(2);
-    res = get_u16_register(3);
+    iothub_client_sample_mqtt_run();
+
+    // res = init_ip_port(IP , 502);
+    // res = get_u16_register(1);
+    // res = get_u16_register(2);
+    // res = get_u16_register(3);
     return 0;
 }
