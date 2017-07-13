@@ -13,13 +13,12 @@
 
 #include "nb_zmq_mbtcp.h"
 
-#ifdef MBED_BUILD_TIMESTAMP
-#include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
+
+#define IP "192.168.1.9"
+#define MBTCP_PORT 502
 
 #define BUFF_SIZE 200
 char file_buffer[BUFF_SIZE];
-
 
 static char  *connectionString; 
 
@@ -27,7 +26,6 @@ static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
 static bool g_continueRunning;
-
 
 #define MESSAGE_COUNT 250
 #define DOWORK_LOOP_NUM     3
@@ -61,11 +59,28 @@ static bool g_continueRunning;
 
 
 
+/* Application Variables for the demo */
+static uint16_t oilPressure = 11; //psi
+static uint16_t altOutputFreq = 50; //hertz
+static uint16_t altOutputVoltage = 99; //volts 
+static uint16_t oilTemperature = 11; //psi
 
-void printer(uint16_t val){
-    printf("The results %d\n", val);
+/*Callback functions to update values*/
+void update_oilPressure(uint16_t newPressure){
+    oilPressure = newPressure;
 }
 
+void update_oilTemperature(uint16_t newTemperature){
+    oilTemperature = newTemperature;
+}
+
+void update_altOutputFreq (uint16_t newAltOutputFreq){
+    altOutputFreq = newAltOutputFreq; 
+}
+
+void update_altOutputVoltage(uint16_t newAltOutputVoltage){
+    altOutputVoltage = newAltOutputVoltage; 
+}
 
 
 typedef struct EVENT_INSTANCE_TAG
@@ -83,10 +98,9 @@ static char* getConnectionString(void)
 	char *token;
 	const char delim[] = "\n";
     
-    
     FILE *pFile = fopen("/home/root/ConnectionString.txt","rb");
 	if(pFile == NULL) { 
-		perror("file open error going with stdname\n");
+		perror("file open error. Cannot retrieve ConnectionString\n");
 	}else { 
 		
 		res = fread( (void*) file_buffer, BUFF_SIZE, 1, pFile); 
@@ -186,13 +200,7 @@ void iothub_client_sample_mqtt_run(void)
     EVENT_INSTANCE messages[MESSAGE_COUNT];
 
     g_continueRunning = true;
-    srand((unsigned int)time(NULL));
-
-
-    uint16_t oilPressure = 11; //psi
-    uint16_t minAltOutputFreq = 55; //hertz
-    uint16_t MinAltOutputVoltage = 99; //volts 
-    
+     
     callbackCounter = 0;
     int receiveContext = 0;
 
@@ -221,8 +229,7 @@ void iothub_client_sample_mqtt_run(void)
             {
                 printf("failure to set option \"TrustedCerts\"\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
-
+#endif
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
             {
@@ -234,16 +241,18 @@ void iothub_client_sample_mqtt_run(void)
 
                 /* Now that we are ready to receive commands, let's send some messages */
                 size_t iterator = 0;
-                uint16_t oilPressure = 11; //psi
-                uint16_t AltOutputFreq = 50; //hertz
-                uint16_t AltOutputVoltage = 99; //volts 
                 do
                 {
                     if (iterator < MESSAGE_COUNT)
                     {
-                        AltOutputFreq = minAltOutputFreq + (rand() % 5);
-                        AltOutputVoltage = MinAltOutputVoltage +  (rand() % 5);
-                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"oilPressure\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", oilPressure  + (rand() % 4 + 2), AltOutputFreq, AltOutputVoltage);
+                        int res;
+                        /* update the variables before sending out the messages */ 
+                        res = get_u16_register( 1, &update_oilPressure);
+                        res = get_u16_register( 2, &update_oilTemperature);
+                        res = get_u16_register( 3, &update_altOutputFreq);
+                        res = get_u16_register( 4, &update_altOutputVoltage);
+
+                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"oilPressure\":%d,\"oilTemperature\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", oilPressure, oilTemperature, altOutputFreq, altOutputVoltage);
                         if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                         {
                             (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
@@ -296,17 +305,12 @@ void iothub_client_sample_mqtt_run(void)
         platform_deinit();
     }
 }
-#define IP "192.168.1.9"
+
 int main(void)
 {
     int res;
-    res = init_ip_port(IP , 502);
-    res = get_u16_register(1, &printer);
+    res = zmq_setup();
+    res = init_ip_port(IP ,MBTCP_PORT);
     iothub_client_sample_mqtt_run();
-
-    // res = init_ip_port(IP , 502);
-    // res = get_u16_register(1);
-    // res = get_u16_register(2);
-    // res = get_u16_register(3);
     return 0;
 }

@@ -14,12 +14,29 @@
 
 static char target_ipaddr[16];
 static int target_port;
+static void *context;
+static void *requester;
 
 
-static int message_parse(void *requester, void (*cbf)(uint16_t val));
+static int message_parse( void (*cbf)(uint16_t val));
 static int zmq_request_send(char *message , void (*cbf)(uint16_t val) );
 
 
+
+int zmq_setup()
+{
+    context = zmq_ctx_new();
+    requester = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
+    return 0;
+}
+
+int zmq_destroy()
+{
+    zmq_close(requester);
+    zmq_ctx_destroy(context);
+    return 0;
+}
 
 int init_ip_port(const char *ip, int port)
 {
@@ -105,17 +122,13 @@ int get_u16_register(int reg, void (*cbf)(uint16_t val) )
 
 static int zmq_request_send(char *message , void (*cbf)(uint16_t val) ){
     int res;
-    void *context = zmq_ctx_new();
-    void *requester = zmq_socket(context, ZMQ_REQ);
-
-    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
-    res = zmq_send(requester, message, strlen(message), 0);
     
-   res = message_parse(requester , cbf);
+    res = zmq_send(requester, message, strlen(message), 0);
+    res = message_parse( cbf);
     return res;
 }
 
-static int message_parse(void *requester, void (*cbf)(uint16_t val)){
+static int message_parse(void (*cbf)(uint16_t val)){
     char buffer[600];
     JSON_Value *root_value;
     JSON_Object *root_object;

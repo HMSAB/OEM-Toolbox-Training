@@ -5,4 +5,7 @@ int init_ip_port(const char *ip, int port);
 
 int get_u16_register(int reg, void (*cbf)(uint16_t val) );
 
+int zmq_setup(void);
+
+int zmq_destroy(void);
 #endif
