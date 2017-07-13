@@ -62,6 +62,12 @@ static bool g_continueRunning;
 
 
 
+void printer(uint16_t val){
+    printf("The results %d\n", val);
+}
+
+
+
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
@@ -294,9 +300,8 @@ void iothub_client_sample_mqtt_run(void)
 int main(void)
 {
     int res;
-    print_test();
     res = init_ip_port(IP , 502);
-    res = get_u16_register(1);
+    res = get_u16_register(1, &printer);
     iothub_client_sample_mqtt_run();
 
     // res = init_ip_port(IP , 502);

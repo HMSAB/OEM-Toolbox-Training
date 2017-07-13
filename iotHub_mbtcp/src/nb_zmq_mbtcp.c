@@ -6,7 +6,7 @@
 #include <uuid/uuid.h>
 #include <zmq.h>
 
-#define DEBUG (0)
+#define DEBUG (1)
 #define DEV_TEST
 
 #define SLAVE_ID 1
@@ -16,7 +16,7 @@ static char target_ipaddr[16];
 static int target_port;
 
 
-static void message_parse(void *requester, void (*cbf)(uint16_t val));
+static int message_parse(void *requester, void (*cbf)(uint16_t val));
 static int zmq_request_send(char *message , void (*cbf)(uint16_t val) );
 
 
@@ -96,17 +96,11 @@ int get_u16_register(int reg, void (*cbf)(uint16_t val) )
 #endif
     
     json_value_free(root_value);
-    zmq_request_send(s , cbf);
+    res = zmq_request_send(s , cbf);
    
     json_free_serialized_string(s);
     
-    void *context = zmq_ctx_new();
-    void *requester = zmq_socket(context, ZMQ_REQ);
-
-    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
-    
-    res = zmq_send(requester, s, strlen(s), 0);
-    return 0;
+    return res;
 }
 
 static int zmq_request_send(char *message , void (*cbf)(uint16_t val) ){
@@ -117,11 +111,11 @@ static int zmq_request_send(char *message , void (*cbf)(uint16_t val) ){
     zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
     res = zmq_send(requester, message, strlen(message), 0);
     
-    message_parse(requester , cbf);
-
+   res = message_parse(requester , cbf);
+    return res;
 }
 
-static void message_parse(void *requester, void (*cbf)(uint16_t val)){
+static int message_parse(void *requester, void (*cbf)(uint16_t val)){
     char buffer[600];
     JSON_Value *root_value;
     JSON_Object *root_object;
@@ -133,36 +127,39 @@ static void message_parse(void *requester, void (*cbf)(uint16_t val)){
 
 #if(DEBUG)
     puts(buffer);
+    puts("\n");
+
 #endif
     root_value = json_parse_string(buffer);
     if (json_value_get_type(root_value) != JSONObject) {
         puts("improper parse expected root to be object\n");
-        return;
+        return 1;
     }
 
     root_object = json_value_get_object(root_value);
     payload_object = json_object_get_object(root_object, "payload");
     printf("%s\n", json_object_get_string(payload_object,"payload_type"));
 
-
     payload_array = json_object_dotget_array(root_object,"payload.payload_data" );
 
-   
-  
     resp_object = json_array_get_object(payload_array, 0);
     if(resp_object != NULL){
         double val =0 ;
 #if(DEBUG)
-        printf("%s\n",json_object_get_string(resp_object , "command") );
-        printf("%s\n",json_object_dotget_string(resp_object , "address.function") );
+        printf("command response:%s \n",json_object_get_string(resp_object , "command") );
+        printf("address function:%s\n",json_object_dotget_string(resp_object , "address.function") );
 #endif
         if (json_object_dothas_value(resp_object,"value.value_data")){
             val = json_object_dotget_number(resp_object , "value.value_data");
+            cbf((uint16_t)val);
 #if(DEBUG)
             printf("%f\n",val);
 #endif
+        json_value_free(root_value);
+          return 0 ;
+          
         }
-
     }
     json_value_free(root_value);
+    return 1;
 }
