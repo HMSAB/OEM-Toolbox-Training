@@ -80,9 +80,6 @@ void update_altOutputFreq (uint16_t newAltOutputFreq){
     altOutputFreq = newAltOutputFreq; 
 }
 
-void update_altOutputVoltage(uint16_t newAltOutputVoltage){
-    altOutputVoltage = newAltOutputVoltage; 
-}
 
 
 typedef struct EVENT_INSTANCE_TAG
@@ -252,7 +249,7 @@ void iothub_client_sample_mqtt_run(void)
                         res = get_u16_register( 1, &update_oilPressure);
                         res = get_u16_register( 2, &update_oilTemperature);
                         res = get_u16_register( 3, &update_altOutputFreq);
-                        res = get_u16_register( 4, &update_altOutputVoltage);
+                        
 
                         sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"oilPressure\":%d,\"oilTemperature\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", DEVICE_NAME ,oilPressure, oilTemperature, altOutputFreq, altOutputVoltage);
                         if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
@@ -314,5 +311,6 @@ int main(void)
     res = zmq_setup();
     res = init_ip_port(IP ,MBTCP_PORT);
     iothub_client_sample_mqtt_run();
+    zmq_destroy();
     return 0;
 }
