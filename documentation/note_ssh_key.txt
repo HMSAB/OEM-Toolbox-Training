@@ -1,0 +1,13 @@
+
+
+On your dev PC run ssh-keygen,
+confirm the default 
+Enter a passphrase ( or don't )
+
+on the NB301 in the /home/apps directory
+mkdir .ssh
+chmod 700 .ssh
+
+back on the dev pc 
+then scp the id_rsa.pub
+rename to known_hosts   
