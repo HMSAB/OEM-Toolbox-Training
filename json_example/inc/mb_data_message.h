@@ -26,6 +26,8 @@ public:
   void read_u16_register_callback(int reg, void (*resp_cbf)(uint16_t val)  );
   void write_u16_register(int reg, uint16_t val);
   void read_flt_register(int reg);
+  void init_zmq(void);
+  void close_zmq(void);
   /*constructor*/
   mb_data_message(int slaveid, int port, std::string ip);
 };

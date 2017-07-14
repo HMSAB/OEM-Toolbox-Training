@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 
  /* this will set the ip address, and port of the target device */ 
   mb_data_message my_message(1, MBTCP_PORT, "192.168.1.9");
+  my_message.init_zmq();
 
 
   my_message.write_u16_register(2, 16);
@@ -27,5 +28,6 @@ int main(int argc, char *argv[])
   my_message.read_u16_register_callback(2, &printer);
   my_message.read_u16_register_callback(1, &printer);
   my_message.read_u16_register_callback(4, &printer);
+  my_message.close_zmq();
   return 0;
 }

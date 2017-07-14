@@ -10,12 +10,26 @@
 
 #define DEBUG
 
-static void message_start_parse(void *requester,void (*cbf)(uint16_t val));
+ void *requester;
+ void *context;
+
+static void message_start_parse(void (*cbf)(uint16_t val));
 static char *parse_payload(json_t *payload, void (*cbf)(uint16_t val));
 
 static void parse_array(json_t *payload_data, char *err , void (*cbf)(uint16_t val));
 static void parse_object(json_t *payload_data, char *err, void (*cbf)(uint16_t val));
 
+void mb_data_message::init_zmq(void){
+    context = zmq_ctx_new();
+    requester = zmq_socket(context, ZMQ_REQ);
+
+    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
+}
+
+void mb_data_message::close_zmq(void){
+   zmq_close(requester);
+   zmq_ctx_destroy(context);
+}
 
 void mb_data_message::read_u16_register(int reg){
     reg_func(reg, COMMAND[read], VALUE_TYPE[U16], FUNCTION[Holding], (uint16_t) NULL);
@@ -31,6 +45,7 @@ void mb_data_message::read_flt_register(int reg){
 }
 
 void mb_data_message::write_u16_register(int reg, uint16_t val){
+    this->callback = NULL;
     reg_func(reg, COMMAND[write], VALUE_TYPE[U16], FUNCTION[Holding], val);
 }
 
@@ -83,18 +98,15 @@ void mb_data_message::reg_func(int reg, std::string command, std::string type, s
     json_decref(payload);
     json_decref(payload_data);
 
-    void *context = zmq_ctx_new();
-    void *requester = zmq_socket(context, ZMQ_REQ);
-
-    zmq_connect(requester, "ipc:///tmp/zeromq/modbus_tcp");
+   
     zmq_send(requester, s, strlen(s), 0);
 
-    message_start_parse(requester, this->callback);
+    message_start_parse( this->callback);
 
     free(s);
 }
 
-static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
+static void message_start_parse( void (*cbf)(uint16_t val))
 {
     json_t *jroot, *id, *payload;
     json_error_t jerror;
@@ -115,7 +127,7 @@ static void message_start_parse(void *requester, void (*cbf)(uint16_t val))
     puts(s);
     free(s);
 #endif 
-
+    
     if (!json_is_object(jroot)) {
         puts("error with json response parsing: json is objects\n");
         json_decref(jroot);
@@ -151,7 +163,7 @@ static void parse_object(json_t *payload_data, char* err, void (*cbf)(uint16_t v
         switch json_typeof(obj_val){
             case JSON_OBJECT:
                 parse_object(obj_val, err , cbf);
-                break;
+            break;
             case JSON_ARRAY:
                 parse_array(obj_val, err, cbf);
             break;
