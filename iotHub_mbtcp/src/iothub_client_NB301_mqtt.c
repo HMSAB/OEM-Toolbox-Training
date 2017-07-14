@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//Taken from Azure IotHub, and modified for training 
 
 #include <stdio.h>
 #include <stdlib.h>
