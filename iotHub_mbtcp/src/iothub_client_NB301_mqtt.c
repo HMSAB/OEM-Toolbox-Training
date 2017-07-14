@@ -60,6 +60,7 @@ static bool g_continueRunning;
 
 
 /* Application Variables for the demo */
+#define DEVICE_NAME "device3"
 static uint16_t oilPressure = 11; //psi
 static uint16_t altOutputFreq = 50; //hertz
 static uint16_t altOutputVoltage = 99; //volts 
@@ -252,7 +253,7 @@ void iothub_client_sample_mqtt_run(void)
                         res = get_u16_register( 3, &update_altOutputFreq);
                         res = get_u16_register( 4, &update_altOutputVoltage);
 
-                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"myFirstDevice\",\"oilPressure\":%d,\"oilTemperature\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", oilPressure, oilTemperature, altOutputFreq, altOutputVoltage);
+                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"oilPressure\":%d,\"oilTemperature\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", DEVICE_NAME ,oilPressure, oilTemperature, altOutputFreq, altOutputVoltage);
                         if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
                         {
                             (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");

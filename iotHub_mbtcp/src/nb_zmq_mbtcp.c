@@ -151,26 +151,23 @@ static int message_parse(void (*cbf)(uint16_t val)){
 
     root_object = json_value_get_object(root_value);
     payload_object = json_object_get_object(root_object, "payload");
-    printf("%s\n", json_object_get_string(payload_object,"payload_type"));
-
     payload_array = json_object_dotget_array(root_object,"payload.payload_data" );
-
     resp_object = json_array_get_object(payload_array, 0);
     if(resp_object != NULL){
         double val =0 ;
-#if(DEBUG)
-        printf("command response:%s \n",json_object_get_string(resp_object , "command") );
-        printf("address function:%s\n",json_object_dotget_string(resp_object , "address.function") );
-#endif
         if (json_object_dothas_value(resp_object,"value.value_data")){
             val = json_object_dotget_number(resp_object , "value.value_data");
             cbf((uint16_t)val);
 #if(DEBUG)
-            printf("%f\n",val);
+            printf("Response value %f\n\n",val);
 #endif
         json_value_free(root_value);
           return 0 ;
-          
+        }else{
+            if (json_object_has_value(resp_object,"status")){
+                puts(json_object_get_string(resp_object, "status"));
+                puts(json_object_get_string(resp_object, "error_string"));
+            }
         }
     }
     json_value_free(root_value);
