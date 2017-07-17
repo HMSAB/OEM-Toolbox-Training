@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//Taken from Azure IotHub, and modified for training 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,7 +80,10 @@ void update_altOutputFreq (uint16_t newAltOutputFreq){
     altOutputFreq = newAltOutputFreq; 
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 489a43f18cc598f24e5f14bf200bb96a87ed1f19
 
 
 typedef struct EVENT_INSTANCE_TAG
@@ -249,7 +253,7 @@ void iothub_client_sample_mqtt_run(void)
                         res = get_u16_register( 1, &update_oilPressure);
                         res = get_u16_register( 2, &update_oilTemperature);
                         res = get_u16_register( 3, &update_altOutputFreq);
-                       
+
 
                         sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"oilPressure\":%d,\"oilTemperature\":%d,\"outputfreq\":%d,\"outputvoltage\":%d}", DEVICE_NAME ,oilPressure, oilTemperature, altOutputFreq, altOutputVoltage);
                         if ((messages[iterator].messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
@@ -311,5 +315,6 @@ int main(void)
     res = zmq_setup();
     res = init_ip_port(IP ,MBTCP_PORT);
     iothub_client_sample_mqtt_run();
+    zmq_destroy();
     return 0;
 }
