@@ -61,7 +61,7 @@ static bool g_continueRunning;
 
 
 /* Application Variables for the demo */
-#define DEVICE_NAME "device5"
+#define DEVICE_NAME "device2"
 static uint16_t oilPressure = 11; //psi
 static uint16_t altOutputFreq = 50; //hertz
 static uint16_t altOutputVoltage = 99; //volts 
@@ -79,12 +79,6 @@ void update_oilTemperature(uint16_t newTemperature){
 void update_altOutputFreq (uint16_t newAltOutputFreq){
     altOutputFreq = newAltOutputFreq; 
 }
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 489a43f18cc598f24e5f14bf200bb96a87ed1f19
-
 
 typedef struct EVENT_INSTANCE_TAG
 {
