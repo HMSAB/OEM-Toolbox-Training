@@ -1,0 +1,1 @@
+HostName=DirTeamTraining.azure-devices.net;DeviceId=NBFromIT1;SharedAccessKey=******=
